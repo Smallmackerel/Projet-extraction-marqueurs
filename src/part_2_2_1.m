@@ -69,3 +69,18 @@ grid on;
 xlabel('Fréquence normalisée (f)');
 ylabel('Gain |H(f)|');
 title('Réponse en fréquence du filtre (Réjections à f_1 et f_2)');
+
+
+%Comparaison avec la DSP
+
+% Spectre de puissance
+subplot(2,1,2);
+[Pxx, f] = periodogram(y, [], 1024, 1);    % DSP estimée (périodogramme)
+H = freqz(B, A, f, 1);                     % Réponse en fréquence théorique
+DSP_theorique = abs(H).^2;                 % DSP théorique
+
+plot(f, 10*log10(Pxx), 'b', 'DisplayName', 'DSP Estimée (Périodogramme)'); hold on;
+plot(f, 10*log10(DSP_theorique), 'r--', 'LineWidth', 2, 'DisplayName', 'DSP Théorique');
+title('Densité Spectrale de Puissance (dB)');
+xlabel('Fréquence normalisée'); ylabel('Magnitude (dB)');
+legend('show'); grid on;
