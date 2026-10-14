@@ -47,13 +47,30 @@ y = filter(B,A,x);
 
 %% Affichage de la réponse en fréquence (Réjections)
 figure;
+
+%%% Représentation temporelle %%%
+
+n = 1:N;
+% Plot simple du signal de sortie filtré
+subplot(2,1,1);
+plot(n, y);
+grid on;
+
+xlim([1 300]); 
+xlabel('Échantillons (n)');
+ylabel('Amplitude');
+title('Représentation temporelle du signal filtré y(n)');
+
+%%% Représentation spectrale %%%
+
 fn = 0 : 1/N : 1/2; 
 
 H = freqz(B, A, 2*pi*fn);
 
-% Affichage du module (l'amplitude) du filtre
+subplot(2,1,2);
 plot(fn, abs(H), 'LineWidth', 1.5);
 grid on;
 xlabel('Fréquence normalisée (f)');
 ylabel('Gain |H(f)|');
 title('Réponse en fréquence du filtre (Résonnance à f_1 et f_2)');
+
