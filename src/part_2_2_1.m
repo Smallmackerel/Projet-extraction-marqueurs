@@ -47,15 +47,15 @@ figure;
 %%% Représentation temporelle %%%
 
 n = 1:N;
-% Plot simple du signal de sortie filtré
-subplot(2,1,1);
-plot(n, y);
-grid on;
+% Plot du signal de sortie filtré
 
-xlim([1 300]); 
-xlabel('Échantillons (n)');
-ylabel('Amplitude');
-title('Représentation temporelle du signal filtré y(n)');
+% plot(n, y);
+% grid on;
+
+% xlim([1 300]); 
+% xlabel('Échantillons (n)');
+% ylabel('Amplitude');
+% title('Représentation temporelle du signal filtré y(n)');
 
 %%% Représentation spectrale %%%
 
@@ -63,7 +63,7 @@ fn = 0 : 1/N : 1/2;
 
 H = freqz(B, A, 2*pi*fn);
 
-subplot(2,1,2);
+subplot(2,3,1);
 plot(fn, abs(H), 'LineWidth', 1.5);
 grid on;
 xlabel('Fréquence normalisée (f)');
@@ -72,16 +72,24 @@ title('Réponse en fréquence du filtre (Réjections à f_1 et f_2)');
 
 
 % Spectre de puissance
-subplot(2,1,2);
+subplot(2,3,2);
 [Pxx, f] = periodogram(y, [], 2000, 1); % DSP estimée (périodogramme)
 H = freqz(B, A, f, 1); % Réponse en fréquence théorique
 DSP_theorique = abs(H).^2; % DSP théorique
 
-plot(f, 10*log10(Pxx)); % DSP estimée
+plot(f, 10*log10(Pxx), 'DisplayName', "DSP estimée"); % DSP estimée
 hold on;
-plot(f, 10*log10(DSP_theorique)); % DSP théorique
+plot(f, 10*log10(DSP_theorique),'DisplayName', "DSP théorique"); % DSP théorique
 title('Densité Spectrale de Puissance (dB)');
 xlabel('Fréquence normalisée'); 
 ylabel('Gain (dB)');
 legend('show'); 
 grid on;
+
+% Périodogramme de Welch
+subplot(2,3,3);
+[pxx, f] = pwelch(x);
+plot(f/pi, pxx);
+title('Périodogramme de Welch');
+xlabel('Fréquence normalisée');
+ylabel('Gain (dB)');
