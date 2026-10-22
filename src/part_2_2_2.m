@@ -73,4 +73,4 @@ grid on;
 xlabel('Fréquence normalisée (f)');
 ylabel('Gain |H(f)|');
 title('Réponse en fréquence du filtre (Résonnance à f_1 et f_2)');
-
+%salut
