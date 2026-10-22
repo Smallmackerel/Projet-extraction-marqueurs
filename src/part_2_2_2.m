@@ -73,4 +73,47 @@ grid on;
 xlabel('Fréquence normalisée (f)');
 ylabel('Gain |H(f)|');
 title('Réponse en fréquence du filtre (Résonnance à f_1 et f_2)');
-%salut
+
+
+%% Comparaison des estimateurs de DSP (Welch, Bartlett, Daniell vs Théorique)
+figure('Name', 'Comparaison des Périodogrammes - Filtre 1', 'Position', [100, 100, 900, 600]);
+Fs = 1; 
+
+% 4. Périodogramme de Daniell (on le calcule d'abord pour récupérer f_d)
+[pxx_raw, f_d] = periodogram(y, [], 1024, Fs);
+m_daniell = 5; % Fenêtre de lissage
+kernel = ones(2*m_daniell + 1, 1) / (2*m_daniell + 1);
+pxx_daniell = conv(pxx_raw, kernel, 'same');
+
+% 1. DSP Théorique (évaluée sur la même grille de fréquence f_d et avec Fs=1)
+[H2, f_th] = freqz(B, A,length(f_d) , Fs);
+DSP_theorique = abs(H2).^2;
+
+% 2. Périodogramme de Welch
+[pxx_welch, f_w] = pwelch(y, hamming(256), 128, 1024, Fs);
+
+% 3. Périodogramme de Bartlett (Cas particulier de Welch avec 0 recouvrement)
+segmentLength = floor(N/4);
+[pxx_bartlett, f_b] = pwelch(y, segmentLength, 0, 1024, Fs);
+
+% 5. Corrélogramme
+[r_yy, lags] = xcorr(y, 'biased');
+M_lag = 100; 
+w = hamming(2*M_lag + 1)';
+r_yy_windowed = r_yy(N - M_lag : N + M_lag) .* w;
+[pxx_correlo, f_c] = freqz(r_yy_windowed, 1, 1024, Fs);
+
+% 6. Affichage en dB
+plot(f_th, 10*log10(DSP_theorique), 'k', 'LineWidth', 2, 'DisplayName', 'DSP Théorique');
+hold on;
+plot(f_d, 10*log10(pxx_raw), 'Color', [0.7 0.7 0.7], 'DisplayName', 'Périodogramme brut'); % Gris clair
+plot(f_w, 10*log10(pxx_welch), 'b', 'DisplayName', 'Welch');
+plot(f_b, 10*log10(pxx_bartlett), 'g', 'DisplayName', 'Bartlett');
+plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell (m=5)');
+
+grid on;
+xlabel('Fréquence normalisée');
+ylabel('Densité Spectrale de Puissance (dB)');
+title('Comparaison des estimateurs de DSP pour le Filtre de Réjection');
+legend('show', 'Location', 'southwest');
+xlim([0 0.5]); 
