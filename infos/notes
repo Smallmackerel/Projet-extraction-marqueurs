@@ -4,3 +4,14 @@ Récap des problèmes que l'on a rencontré et comment ils ont été résolu.
 Faire des figures propres
 toujours, commenter les résultats
 numéroter les équations
+
+
+---
+
+# Rapport :
+- projet extraction de marqueurs en vue de classification.
+
+## Part 2.2 : 
+- Réalisation de N échantillons, résultant d'un filtrage par un filtre à 4 zéros à réjections fixés.
+- De même pour générer une réalisation de N échantillons, résultant d'un filtrage par un filtre à 4 pôles à résonances fixés.
+
