@@ -5,19 +5,10 @@ Faire des figures propres
 toujours, commenter les résultats
 numéroter les équations
 
-
----
-
-# Rapport :
-- projet extraction de marqueurs en vue de classification.
-
-## Part 2.2 : 
-- Réalisation de N échantillons, résultant d'un filtrage par un filtre à 4 zéros à réjections fixés.
-- De même pour générer une réalisation de N échantillons, résultant d'un filtrage par un filtre à 4 pôles à résonances fixés.
-
-=======
 Conclusion répond à introduction
 Faire un plan
 Conclusion =/= résumé
 Faire des phrases courtes sans blabla
 
+
+Pour montrer que la tendance obtenu est valide, on peut représenter un signal dont on connaît la forme et représenter la tendance pour voir si elle correspond.
