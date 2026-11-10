@@ -114,6 +114,6 @@ plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell 
 grid on;
 xlabel('Fréquence normalisée');
 ylabel('Densité Spectrale de Puissance (dB)');
-title('Comparaison des estimateurs de DSP pour le Filtre de Réjection');
+title('Comparaison des estimateurs de DSP pour le Filtre de Résonnance');
 legend('show', 'Location', 'southwest');
 xlim([0 0.5]); 
