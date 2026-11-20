@@ -1,0 +1,294 @@
+\documentclass[a4paper,11pt]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage[margin=1.7 cm]{geometry}
+
+
+% Informations du document
+
+\begin{document}
+
+\title{%
+    Projet ETE7-TSIG2\\
+    \large Filtres numériques, estimation et applications
+}
+\author{%
+    Élise KY et Jean HAQUIN\\ 
+    \small Encadré par Éric Grivel
+}
+\date{Novembre 2026}
+
+\newpage
+
+\maketitle
+
+\section{Introduction}
+
+% Présenter ici les objectifs du projet et les méthodes utilisées.
+
+\section{Signaux aléatoires}
+
+
+
+\subsection{Génération des signaux}
+
+Générons un signal de $N$ échantillons obtenu par filtrage à l'aide d'un filtre à réponse impulsionnelle finie (RIF) comportant quatre zéros, associés aux fréquences de réjection $1/4$ et $4/9$.
+
+La fonction de transfert de ce filtre s'écrit sous la forme :
+\begin{equation}
+    H(z) = \prod_{i=1}^{4}(1-z_i z^{-1}) = 1+b_1z^{-1}+b_2z^{-2}+b_3z^{-3}+b_4z^{-4}.
+    \label{eq:transfert1}
+\end{equation}
+Le signal en sortie de ce filtre est régit par l'équation au différence : 
+\begin{equation}
+    y(n)=x(n+b_{1}x(n-1)+b_{2}x(n-2)+b_{3}x(n-3)+b_{4}x(n-4)
+    \label{eq:difference1}
+\end{equation}
+Il s'agit donc d'un processus à moyenne ajustée (MA), il est donc automatiquement stationnaire au sens large.
+
+\begin{figure}[H]   
+    \centering
+    \includegraphics[width=\linewidth]{2.2.1_freq-temp.jpg}
+    \caption{Représentations temporelle et fréquentielle du signal.}
+    \label{fig:freq-temp1}
+\end{figure}
+
+Sur la réponse fréquentiel, on constate bien les réjections en $1/4$ et $1/9$.
+\newline
+% certainement des ajouts à faire ici
+
+On procède de la même manière pour générer un signal de $N$ échantillons, obtenu par filtrage à l'aide d'un filtre à réponse impulsionnelle infinie, comportant 4 pôles à résonances fixés aux fréquences $1/3$ et $3/7$.
+Sa fonction de transfert s'écrit : 
+\begin{equation}
+    H(z)=\frac{1}{\prod _{i=1}^{4}(1-p_{i}z^{-1})}=\frac{1}{1+a_{1}z^{-1}+a_{2}z^{-2}+a_{3}z^{-3}+a_{4}z^{-4}}
+\end{equation}
+Son équation aux différences est : 
+\begin{equation}
+    y(n)=-a_{1}y(n-1)-a_{2}y(n-2)-a_{3}y(n-3)-a_{4}y(n-4)+x(n)
+\end{equation}
+Il s'agit d'un processus auto-régressif (AR).
+\newline
+Pour assurer la stabilité, il est donc nécessaire que les pôles soient situés dans le cercle unité. Or ici, ils sont choisi de module égal à 0,99. Donc, le processus est stationnaire au sens large.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{2.2.2_freq-temp.jpg}
+    \caption{Représentation temporelle et fréquentielle du signal.}
+    \label{fig:freq-temp2}
+\end{figure}
+
+Sur la réponse fréquentiel, on constate bien les résonances en $1/3$ et $3/7$.
+
+% certainement des ajouts à faire ici
+
+\subsection{Comparaison des estimateurs de DSP}
+
+L'étude comparative des différents estimateurs de la Densité Spectrale de Puissance (DSP) sur N=2000 échantillons permet de mettre en évidence le compromis entre la variance qui influe sur le lissage du bruit et la résolution pour la finesse des pics et des creux.
+
+\begin{itemize}
+\item \textbf{Périodogramme brut :} Malgré la visibilité des structures du filtre, le périodogramme présente une variance trop importante pour pouvoir être exploitable. On utilise donc des méthodes de lissage.
+
+\item \textbf{Périodogramme de Daniell (Lissage spectral avec m=5)) :}
+Cette méthode permet de réduire la variance et donc de lisser le signal. Cependant, elle montre ses limites avec le filtre de résonance où le lissage a tendance à atténuer les pics aigus. 
+
+\item \textbf{Périodogramme de Barlett (Moyennage de segments disjoints) :}
+Cette méthode segmente le signal en sous-segments sans chevauchement ce qui permet de réduire la variance du spectre mais dégrade la résolution. On sépare le signal en 500 échantillons (N/4) avec une fenêtre rectangulaire.
+
+\item \textbf{Périodogramme de Welch (Moyennage de segments avec chevauchement) :}
+Cette méthode segmente également le signal afin de réduire la variance mais utilise le chevauchement des segments afin de préserver la finesse des réjections (zéros) et la hauteur des résonances (pôles). On segmente le signal avec des fenêtres de Hamming de 256 échantillons et un taux de chevauchement de 50\%.
+
+\item \textbf{Corrélogramme :} permet d'estimer la DSP à partir de la transformée de Fourier discrète de l'estimation de la fonction de corrélation
+\end{itemize}
+
+En conclusion, le périodogramme de Welch est la méthode qui offre le meilleur compromis entre variance et résolution ce qui permet de caractériser aussi bien le creux des réjections que les pics de résonance des processus stationnaires.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{2.2.1_periodogramme.jpg}
+        \caption{Comparaison des estimateurs de DSP pour le filtre de Réjection.}
+        \label{fig:sub1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{2.2.2_periodogramme.jpeg}
+        \caption{Comparaison des estimateurs de DSP pour le filtre de Résonnance.}
+        \label{fig:sub2}
+    \end{subfigure}
+    \caption{Comparaison des estimateurs de DSP pour les deux filtres.}
+    \label{fig:global}
+\end{figure}
+
+
+
+
+\subsection{Mise en œuvre de méthode de dégagement de tendances}
+
+Dans cette partie nous allons expérimenter différentes méthodes d'estimation de tendances.
+
+Dans un premier temps, le signal $x$ de taille $M$ est centré puis intégré, de façon a obtenir le processus $y$.
+\subsubsection{Estimation par décomposition du signal en blocs}
+
+Une première méthode de d'estimation de tendance consiste à décomposer un signal en bloc, de grain plus ou moins fin. Ici, on à choisi de gros blocs sur un signal sinusoïdal connu : $x = 5 sin(2\pi2\frac{t}{M})$
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{2.2.3_2A.jpg}
+    \caption{Estimateur en bloc.}
+    \label{fig:freq-temp2}
+\end{figure}
+
+
+\subsubsection{Estimation par filtrage passe bas}
+On effectue ici la moyenne des N derniers échantillons avec une fenêtre glissante.
+Le filtre à moyenne mobile est de la forme : 
+$$y[n]=\frac{1}{N}\sum _{k=0}^{N-1}x[n-k]$$
+
+qui s'écrit :$$H(z)=\frac{Y(z)}{X(z)}=\frac{1}{N}\sum _{k=0}^{N-1}z^{-k}=\frac{1}{N}\left(\frac{1-z^{-N}}{1-z^{-1}}\right)$$
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{2.2.3_2B.jpg}
+    \caption{Représentation de l'estimation par moyenne glissante.}
+    \label{fig:freq-temp2}
+\end{figure}
+
+Caractéristiques de ce filtre : 
+\begin{itemize}
+    \item RIF : nombre fini d'échantillons 
+    \item Causal : la sortie $y$ ne dépend que des valeurs passées et présentes du signal d'entrée $x$
+    \item Stable : car c'est un RIF, sa somme est finie.
+    \item Réponse en fréquence : il s'agit d'un filtre passe-bas.
+    
+\end{itemize}
+
+Un filtre classique introduit un déphasage qui déforme les pics et formes d'ondes. Afin de pouvoir analyser le signal sans détérioration pas le filtre, on utilise donc un filtre à phase nulle.
+il existe deux stratégies qui permettent d'obtenir un filtre à phase nulle à partir 
+
+\subsubsection{Estimation par filtre à phase nulle}
+La dernière méthode testée est fondée sur un filtre à phase nulle.
+Pour cela, on applique 2 stratégies, l'une d'aller-retour qui s'applique de la façon suivante.
+
+\begin{enumerate}
+    \item On filtre le signal d'entrée $x(n)$ par un filtre de réponse impulsionnelle $h(n) \to$ on obtient $g(n)$.
+    \item On inverse temporellement ce signal intermédiaire : $g(-n)$.
+    \item On filtre ce signal inversé à nouveau par $h(n) \to$ on obtient $r(n)$.
+    \item On inverse temporellement le résultat final : $s(n) = r(-n)$.
+\end{enumerate}
+
+\paragraph{Démonstration de la phase nulle}
+
+Montrons que cette approche est à phase nulle.
+
+En passant dans le domaine $z$, étape par étape :
+
+\begin{align*}
+G(z) &= X(z) \cdot H(z) \\
+G(z^{-1}) &= X(z^{-1}) \cdot H(z^{-1}) \quad \text{par inversion} \\
+R(z) &= G(z^{-1}) \cdot H(z) = X(z^{-1}) \cdot H(z^{-1}) \cdot H(z) \quad \text{en appliquant le filtre à nouveau} \\
+S(z) &= R(z^{-1}) = S(z) = X(z) \cdot H(z) \cdot H(z^{-1})
+\end{align*}
+
+on passe dans le domaine fréquentiel :
+
+$\boxed{H_{\text{global}}(f) = H(e^{j2\pi f}) \cdot H(e^{-j2\pi f})}$
+
+donc $\boxed{|H_{\text{global}}(f)| = |H(e^{j2\pi f})|^2}$
+
+est réel et positif
+
+La phase du filtre est donc nulle et ce pour tout filtre $h(n)$.
+
+\medskip
+\hrule
+\medskip
+
+La seconde stratégie, somme les temps directs et temps inversés ensembles :
+
+\begin{enumerate}
+    \item Le signal $x(n)$ est filtré par $h(n)$ $g(n) = (h * x)(n)$.
+    \item Le signal inversé $x(-n)$ est filtré par le même filtre $r(n) = h(n) * x(-n)$ (abus).
+    \item La sortie finale est obtenue en sommant : $y(n) = g(n) + r(-n)$.
+\end{enumerate}
+
+\paragraph{Démonstration de la phase nulle}
+
+Montrons que cette stratégie est elle aussi à phase nulle.
+
+\medskip
+\noindent\textbf{1er membre :}
+
+$G(z) = X(z)\dot H(z)$
+
+\medskip
+\noindent\textbf{2nd membre :}
+
+$R(z^{-1}) = X(z) \cdot H(z^{-1})$
+
+donc, $S(z) = X(z) \cdot H(z) + X(z) \cdot H(z^{-1}) = X(z) \cdot \left[ H(z) + H(z^{-1}) \right]$
+
+donc, $H_{\text{global}}(f) = H(e^{j2\pi}) + H(e^{-j2\pi}) = 2 Re[H(e^{j2\pi})]$
+
+\[
+\begin{cases}
+\text{Si } \text{Re}\{H(e^{j\omega})\} > 0, & \text{la phase est nulle.} \\
+\text{Si } \text{Re}\{H(e^{j\omega})\} < 0, & \text{la phase vaut } \pi.
+\end{cases}
+\]
+
+
+-------------------------------------- à terminer ----------------------
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{2.2.3_2C.jpg}
+    \caption{Représentation des stratégies de filtrage à phase nulle.}
+    \label{fig:freq-temp2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{2.2.3_4.jpg}
+    \caption{Représentation de log(P(N)) en fonction de log(N) et déduction du marqueur $\alpha$.}
+    \label{fig:freq-temp2}
+\end{figure}
+
+
+\subsection{Applications}
+
+\subsubsection{Cas n°1 : Bruit Blanc Gaussien Centré}
+
+\subsection{Cas n°2 : Processus autorégressif d’ordre 2}
+
+\subsubsection{Remarque sur l'importance de l'étape d'intégration}
+Sans l'intégration à l'étape 1, le signal reste très bruité avec beaucoup parasites perturbant la bonne application des étapes à venir. Par exemple, on ne peut pas effectuer de bon fenêtrage, à cause d'un trop grande fluctuation des valeurs. L'intégration permet de travailler sur l'énergie du signal. On remarque "à l'oeil" que l'étape d'intégration, dégage déjà des tendances. Les figures suivantes illustrent bien cela.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{cas1_2.jpeg}
+        \caption{Représentation de l'estimation par bloc sur BBGC \textbf{avec} l'étape d'intégration.}
+        \label{fig:freq-temp2}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{cas1_2SI.jpeg}
+        \caption{Représentation de l'estimation par bloc sur BBGC \textbf{sans} l'étape d'intégration.}
+        \label{fig:freq-temp2SI}
+    \end{minipage}
+\end{figure}
+
+
+
+\end{document}
