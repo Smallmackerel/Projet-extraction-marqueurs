@@ -7,7 +7,14 @@ clear; clc;
 M = 1000; 
 % signal
 t1 = 1:M;
-x = 5 * sin(2*pi*2*t1/M); 
+% x = 5 * sin(2*pi*2*t1/M); 
+
+m = 2;
+sigma_carre = 1;
+bruit = sqrt(sigma_carre) * randn(1,M) + m;
+signal_utile = 5 * sin(2*pi*2*t1/M); 
+x = signal_utile + bruit;
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,13 +230,11 @@ fprintf('===============================================\n');
 figure('Name', 'Étape 4 : Graphique Log-Log et Pente (DFA)', 'Color', 'w');
 
 % Tracé des points calculés pour chaque N
-plot(log_N, log_P, 'o', 'MarkerSize', 4, 'MarkerFaceColor', [0 0.447 0.741], ...
-    'DisplayName', 'Points mesurés (log(P(N)) vs log(N))');
+plot(log_N, log_P, 'o', 'MarkerSize', 4, 'MarkerFaceColor', [0 0.447 0.741], 'DisplayName', 'Points mesurés (log(P(N)) vs log(N))');
 hold on;
 
 % Tracé de la droite de régression
-plot(log_N, droite_fit, 'r-', 'LineWidth', 2, ...
-    'DisplayName', sprintf('Droite d''ajustement (Pente \\alpha = %.3f)', pente));
+plot(log_N, droite_fit, 'r-', 'LineWidth', 2, 'DisplayName', sprintf('Droite d''ajustement (Pente \\alpha = %.3f)', pente));
 
 grid on;
 xlabel('log_{10}(N)', 'FontWeight', 'bold');
