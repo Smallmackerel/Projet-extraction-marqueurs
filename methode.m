@@ -7,24 +7,18 @@ clear; clc;
 M = 1000; 
 % signal
 t1 = 1:M;
-% x = 5 * sin(2*pi*2*t1/M); 
-
-m = 2;
-sigma_carre = 1;
-bruit = sqrt(sigma_carre) * randn(1,M) + m;
-signal_utile = 5 * sin(2*pi*2*t1/M); 
-x = signal_utile + bruit;
-
+x = 5 * sin(2*pi*2*t1/M); 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % étape 1 centrage puis intégration
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+x=x(:);
 x_centre = x - mean(x);
 % intégration par méthode des rectangles
 %%% cumtrapz pour la méthode des trapèzes
-y = cumsum(x_centre); 
+y = cumtrapz(x_centre); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % étape 2a décomposition en blocs
@@ -62,7 +56,7 @@ for i = 1:L
         bloc_tendance = val_tendance * ones(N,1);
     else
         % modèle par droite de régression (degré 1)
-        p = polyfit(t, block, 1);
+        p = polyfit(t, bloc, 1);
         bloc_tendance = polyval(p,t);
     end
     tendance(debut:fin) = bloc_tendance;
@@ -110,7 +104,7 @@ b = (1/N) * ones(1, N);
 a = 1;
 
 % filtrage sur y
-tendance_2b = filter(a,b,y);
+tendance_2b = filter(b,a,y);
 
 % recalage du signal pour compenser le retard de (N-1)/2
 
@@ -127,6 +121,7 @@ legend('Location', 'northwest');
 title(['Estimation de la tendance par moyenne glissante causale (N = ', num2str(N), ')']);
 xlabel('Indice n'); ylabel('Amplitude');
 grid on;
+hold off;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% fin plot %%%%%%%%%%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,13 +144,13 @@ tendance_s1 = flipud(r_s1);
 % Strat 2
 % ===================================
 
-g_s2 = filter(a,b,y);
+g_s2 = filter(b,a,y);
 
 y_s2_inverse = flipud(y);
 
 r_s2 = filter(b,a,y_s2_inverse);
 
-tendance_s2 = (g_s2 + flipud(r_s2)) / 2;
+tendance_s2 = g_s2 + flipud(r_s2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot Étape 2c
@@ -178,9 +173,9 @@ hold off;
 r = y - tendance_s1;
 
 % puissance des flucuations
-P_N = mean(r.^2);
+P_N_bloc = mean(r.^2);
 
-fprintf('Pour une taille de bloc N = %d, la puissance P(N) vaut : %.4f\n', N, P_N);
+fprintf('Pour une taille de bloc N = %d, la puissance P(N) vaut : %.4f\n', N, P_N_bloc);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % étape 4 : log-log et droite de régression
@@ -221,7 +216,7 @@ pente = p_droite(1);
 droite_fit = polyval(p_droite, log_N);
 
 fprintf('===============================================\n');
-fprintf('MARQUEUR OBTENUE (Pente de la droite) : %.4f\n', pente);
+fprintf('MARQUEUR OBTENU (Pente de la droite) : %.4f\n', pente);
 fprintf('===============================================\n');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -230,11 +225,13 @@ fprintf('===============================================\n');
 figure('Name', 'Étape 4 : Graphique Log-Log et Pente (DFA)', 'Color', 'w');
 
 % Tracé des points calculés pour chaque N
-plot(log_N, log_P, 'o', 'MarkerSize', 4, 'MarkerFaceColor', [0 0.447 0.741], 'DisplayName', 'Points mesurés (log(P(N)) vs log(N))');
+plot(log_N, log_P, 'o', 'MarkerSize', 4, 'MarkerFaceColor', [0 0.447 0.741], ...
+    'DisplayName', 'Points mesurés (log(P(N)) vs log(N))');
 hold on;
 
 % Tracé de la droite de régression
-plot(log_N, droite_fit, 'r-', 'LineWidth', 2, 'DisplayName', sprintf('Droite d''ajustement (Pente \\alpha = %.3f)', pente));
+plot(log_N, droite_fit, 'r-', 'LineWidth', 2, ...
+    'DisplayName', sprintf('Droite d''ajustement (Pente \\alpha = %.3f)', pente));
 
 grid on;
 xlabel('log_{10}(N)', 'FontWeight', 'bold');

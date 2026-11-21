@@ -8,19 +8,13 @@ clc;
 N = 2000;
 m = 0;
 sigma_carre = 1;
-x = abs(sqrt(sigma_carre) + randn(1,N) + m);
+x = sqrt(sigma_carre)*randn(1,N) + m;
 
 %% création du filtre : 
 
 f_1 = 1/4;
 f_2 = 4/9;
-R = 0;
 r = 0.95;
-
-%%% pôles
-
-p_1 = R*exp(1i*2*pi*f_1);
-p_2 = R*exp(1i*2*pi*f_2);
 
 %%% zéros
 
@@ -48,7 +42,7 @@ figure;
 
 n = 1:N;
 % Plot du signal de sortie filtré
-subplot(3,3,1)
+subplot(2,1,1);
 plot(n, y);
 grid on;
 
@@ -63,7 +57,7 @@ fn = 0 : 1/N : 1/2;
 
 H = freqz(B, A, 2*pi*fn);
 
-subplot(3,3,2);
+subplot(2,1,2);
 plot(fn, abs(H), 'LineWidth', 1.5);
 grid on;
 xlabel('Fréquence normalisée (f)');
@@ -83,7 +77,7 @@ pxx_daniell = conv(pxx_raw, kernel, 'same');
 
 % 1. DSP Théorique (évaluée sur la même grille de fréquence f_d et avec Fs=1)
 [H2, f_th] = freqz(B, A,length(f_d) , Fs);
-DSP_theorique = abs(H2).^2;
+DSP_theorique = sigma_carre * abs(H2).^2; % DSP theorique = sigma_carre * |H(f)|^2
 
 % 2. Périodogramme de Welch
 [pxx_welch, f_w] = pwelch(y, hamming(256), 128, 1024, Fs);
@@ -96,16 +90,18 @@ segmentLength = floor(N/4);
 [r_yy, lags] = xcorr(y, 'biased');
 M_lag = 100; 
 w = hamming(2*M_lag + 1)';
-r_yy_windowed = r_yy(N - M_lag : N + M_lag) .* w;
+idx_zero = length(y);
+r_yy_windowed = r_yy(idx_zero - M_lag : idx_zero + M_lag) .* w;
 [pxx_correlo, f_c] = freqz(r_yy_windowed, 1, 1024, Fs);
 
 % 6. Affichage en dB
 plot(f_th, 10*log10(DSP_theorique), 'k', 'LineWidth', 2, 'DisplayName', 'DSP Théorique');
 hold on;
-plot(f_d, 10*log10(pxx_raw), 'Color', [0.7 0.7 0.7], 'DisplayName', 'Périodogramme brut'); % Gris clair
-plot(f_w, 10*log10(pxx_welch), 'b', 'DisplayName', 'Welch');
-plot(f_b, 10*log10(pxx_bartlett), 'g', 'DisplayName', 'Bartlett');
-plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell (m=5)');
+plot(f_d, 10*log10(pxx_raw), 'Color', [0.7 0.7 0.7], 'DisplayName', 'Périodogramme brut'); % Périodogramme brut
+plot(f_w, 10*log10(pxx_welch), 'b', 'DisplayName', 'Welch'); % Welch
+plot(f_b, 10*log10(pxx_bartlett), 'g', 'DisplayName', 'Bartlett'); % Barlett
+plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell (m=5)'); % Daniell
+plot(f_c, 10*log10(abs(pxx_correlo)), 'r', 'LineWidth', 1.2, 'DisplayName', 'Corrélogramme (M=100)'); % Corrélogramme
 
 grid on;
 xlabel('Fréquence normalisée');
@@ -113,3 +109,4 @@ ylabel('Densité Spectrale de Puissance (dB)');
 title('Comparaison des estimateurs de DSP pour le Filtre de Réjection');
 legend('show', 'Location', 'southwest');
 xlim([0 0.5]); 
+hold off;

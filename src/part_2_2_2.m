@@ -8,14 +8,14 @@ clc;
 N = 2000;
 m = 0;
 sigma_carre = 1;
-x = abs(sqrt(sigma_carre) + randn(1,N) + m);
+x = sqrt(sigma_carre)*randn(1,N) + m;
 
 %% création du filtre : 
 
 f_1 = 1/3;
 f_2 = 3/7;
 R = 0.99; % module pôles
-r = 0;
+
 
 %%% pôles
 
@@ -24,17 +24,10 @@ p_2 = conj(p_1);
 p_3 = R*exp(1i*2*pi*f_2);
 p_4 = conj(p_3);
 
-%%% zéros
-
-z_1 = r*exp(1i*2*pi*f_1);
-z_2 = conj(z_1);
-z_3 = r*exp(1i*2*pi*f_2);
-z_4 = conj(z_3);
 
 %%% Numérateur
 
-Zeros = [z_1 z_2 z_3 z_4];
-B = poly(Zeros);
+B = 1; % Filtre tout pôle
 
 %%% Dénominateur : 
 
@@ -45,12 +38,12 @@ A = poly(Poles);
 y = filter(B,A,x);
 
 
-%% Affichage de la réponse en fréquence (Réjections)
+%% Affichage de la réponse en fréquence (Résonances)
 figure;
 
 %%% Représentation temporelle %%%
 
-n = 1:N;
+n = 1:N; 
 % Plot simple du signal de sortie filtré
 subplot(2,1,1);
 plot(n, y);
@@ -72,7 +65,7 @@ plot(fn, abs(H), 'LineWidth', 1.5);
 grid on;
 xlabel('Fréquence normalisée (f)');
 ylabel('Gain |H(f)|');
-title('Réponse en fréquence du filtre (Résonnance à f_1 et f_2)');
+title('Réponse en fréquence du filtre (Résonances à f_1 et f_2)');
 
 
 %% Comparaison des estimateurs de DSP (Welch, Bartlett, Daniell vs Théorique)
@@ -87,7 +80,7 @@ pxx_daniell = conv(pxx_raw, kernel, 'same');
 
 % DSP Théorique (évaluée sur la même grille de fréquence f_d et avec Fs=1)
 [H2, f_th] = freqz(B, A,length(f_d) , Fs);
-DSP_theorique = abs(H2).^2;
+DSP_theorique = sigma_carre * abs(H2).^2;
 
 % Périodogramme de Welch
 [pxx_welch, f_w] = pwelch(y, hamming(256), 128, 1024, Fs);
@@ -100,20 +93,23 @@ segmentLength = floor(N/4);
 [r_yy, lags] = xcorr(y, 'biased');
 M_lag = 100; 
 w = hamming(2*M_lag + 1)';
-r_yy_windowed = r_yy(N - M_lag : N + M_lag) .* w;
+idx_zero = length(y);
+r_yy_windowed = r_yy(idx_zero - M_lag : idx_zero + M_lag) .* w;
 [pxx_correlo, f_c] = freqz(r_yy_windowed, 1, 1024, Fs);
 
 % Affichage en dB
-plot(f_th, 10*log10(DSP_theorique), 'k', 'LineWidth', 2, 'DisplayName', 'DSP Théorique');
+plot(f_th, 10*log10(DSP_theorique), 'k', 'LineWidth', 2, 'DisplayName', 'DSP Théorique'); % DSP théorique
 hold on;
-plot(f_d, 10*log10(pxx_raw), 'Color', [0.7 0.7 0.7], 'DisplayName', 'Périodogramme brut'); 
-plot(f_w, 10*log10(pxx_welch), 'b', 'DisplayName', 'Welch');
-plot(f_b, 10*log10(pxx_bartlett), 'g', 'DisplayName', 'Bartlett');
-plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell (m=5)');
-
+plot(f_d, 10*log10(pxx_raw), 'Color', [0.7 0.7 0.7], 'DisplayName', 'Périodogramme brut'); % Périodogramme brut
+plot(f_w, 10*log10(pxx_welch), 'b', 'DisplayName', 'Welch'); % Welch
+plot(f_b, 10*log10(pxx_bartlett), 'g', 'DisplayName', 'Bartlett'); % Barlett
+plot(f_d, 10*log10(pxx_daniell), 'm', 'LineWidth', 1.5, 'DisplayName', 'Daniell (m=5)'); % Daniell -> expliquer le choix des paramètres
+plot(f_c, 10*log10(abs(pxx_correlo)), 'c', 'LineWidth', 1.2, 'DisplayName', 'Corrélogramme (M=100)'); % Corrélogramme -> expliquer le choix des paramètres
+ 
 grid on;
 xlabel('Fréquence normalisée');
 ylabel('Densité Spectrale de Puissance (dB)');
-title('Comparaison des estimateurs de DSP pour le Filtre de Résonnance');
+title('Comparaison des estimateurs de DSP pour le Filtre de Résonances');
 legend('show', 'Location', 'southwest');
 xlim([0 0.5]); 
+hold off;
