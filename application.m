@@ -57,7 +57,7 @@ for i = 1:L
         bloc_tendance = val_tendance * ones(N,1);
     else
         % modèle par droite de régression (degré 1)
-        p = polyfit(t, block, 1);
+        p = polyfit(t, bloc, 1);
         bloc_tendance = polyval(p,t);
     end
     tendance(debut:fin) = bloc_tendance;
@@ -105,7 +105,7 @@ b = (1/N) * ones(1, N);
 a = 1;
 
 % filtrage sur y
-tendance_2b = filter(a,b,y);
+tendance_2b = filter(b,a,y);
 
 % recalage du signal pour compenser le retard de (N-1)/2
 
@@ -144,7 +144,7 @@ tendance_s1 = flipud(r_s1);
 % Strat 2
 % ===================================
 
-g_s2 = filter(a,b,y);
+g_s2 = filter(b,a,y);
 
 y_s2_inverse = flipud(y);
 
@@ -172,7 +172,7 @@ hold off;
 
 r = y - tendance_s1;
 
-% puissance des flucuations
+% puissance des fluctuations
 P_N = mean(r.^2);
 
 fprintf('Pour une taille de bloc N = %d, la puissance P(N) vaut : %.4f\n', N, P_N);
@@ -216,7 +216,7 @@ pente = p_droite(1);
 droite_fit = polyval(p_droite, log_N);
 
 fprintf('===============================================\n');
-fprintf('MARQUEUR OBTENUE (Pente de la droite) : %.4f\n', pente);
+fprintf('MARQUEUR OBTENU (Pente de la droite) : %.4f\n', pente);
 fprintf('===============================================\n');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

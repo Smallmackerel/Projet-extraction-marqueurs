@@ -17,8 +17,7 @@ x = 5 * sin(2*pi*2*t1/M);
 x=x(:);
 x_centre = x - mean(x);
 % intégration par méthode des rectangles
-%%% cumtrapz pour la méthode des trapèzes
-y = cumtrapz(x_centre); 
+y = cumsum(x_centre); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % étape 2a décomposition en blocs
